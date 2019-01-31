@@ -2,8 +2,8 @@
 This is the python version and assume you have already install these libraries:\
 [Spectral](http://www.spectralpython.net/), [Pillow](https://pillow.readthedocs.io/en/stable/), [NumPy](http://www.numpy.org/), [re](https://docs.python.org/3/library/re.html) and [SciPy](https://www.scipy.org/).
 
-**Input: Ashwin's model txt, albedo cube, thermal inertia image (.tiff)
-**Output: Temperature mapping based on Ashwin's thermal model for given albedo cube
+**Input**: Ashwin's model txt, albedo cube, thermal inertia image (.tiff)
+**Output**: Temperature mapping based on Ashwin's thermal model for given albedo cube
 
 There are two versions: one for jupyter notebook (Generate_Thermal_Map_txt.ipynb) and one for python script (thermal_map_basedon_Ashwin_model.py).
 
