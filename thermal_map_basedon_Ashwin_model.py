@@ -8,7 +8,6 @@ import spectral as spy
 from PIL import Image
 import numpy as np
 import re
-import matplotlib.pyplot as plt
 from scipy import interpolate
 
 folder = input("What is your folder path:")
