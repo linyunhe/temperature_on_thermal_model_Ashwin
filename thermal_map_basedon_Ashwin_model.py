@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import spectral as spy
@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 folder = input("What is your folder path:")
 albedo_filename = input("What is the filename of albedo:")
+num_bands = input("Which band is selected out of albedo file:")
 TI_filename = input("What is the filename of thermal inertia:")
 thermal_model_filename1 = input("What is the filename of thermal model 1:")
 degree1 = input("What is the degree of thermal model 1:")
@@ -22,7 +23,7 @@ degree = input("What is your expected degree:")
 T_savefilename = input("Save name of output temperature:")
 
 albedo_file = folder+'/'+albedo_filename+'.hdr'
-band_num = 400
+band_num = int(num_bands)
 TI_file = folder+'/'+TI_filename+'.tiff'
 thermal_model_file1 = folder+'/'+thermal_model_filename1+'.txt'
 thermal_model_file2 = folder+'/'+thermal_model_filename2+'.txt'
@@ -30,7 +31,6 @@ T_savefile = folder+'/'+T_savefilename
 degree1 = float(degree1)
 degree2 = float(degree2)
 degree = float(degree)
-
 
 
 # Read albedo and TI
@@ -41,17 +41,29 @@ TI_lon_del, TI_lat_del = TI.tag[33550][0:2]
 TI = np.array(TI)
 TI_num_row, TI_num_col = TI.shape
 fh = open(albedo_file)
+proj = ''
+flag = False
 for line in fh:
     # in python 2
     # print line
     # in python 3
     if "map info" in line:
-        lon_start, lat_start, lon_del, lat_del = re.findall("[-+]?\d*\.\d+|\d+", line)[5:9]
+        tmp = line.split(',')
+        lon_start, lat_start, lon_del, lat_del = tmp[3:7]
         lon_start = float(lon_start)
         lat_start = float(lat_start)
         lon_del = float(lon_del)
         lat_del = float(lat_del)
-        break
+        if lon_start < 0:
+            lon_start = lon_start + OFFSET
+        proj += line
+        flag = True
+    if flag:
+        if "wavelength units" in line:
+            break
+        else:
+            proj += line
+        
 fh.close()
 print("TI start long: "+str(TI_lon_start)+" and delta: "+str(TI_lon_del))
 print("TI start lat: "+str(TI_lat_start)+" and delta: "+str(TI_lat_del))
@@ -63,23 +75,23 @@ model1 = open(thermal_model_file1)
 model2 = open(thermal_model_file2)
 start_flag = False
 model_table1 = list()
-for line in model1:
+for line2 in model1:
     if start_flag:
-        tmp_albedo, tmp_ti,tmp_t = re.findall("\d+\.\d+", line)
+        tmp_albedo, tmp_ti,tmp_t = re.findall("\d+\.\d+", line2)
         model_table1.append([float(tmp_albedo),float(tmp_ti),float(tmp_t)])
-    elif "Columns are Albedo" in line:
+    elif "Columns are Albedo" in line2:
         start_flag = True
 start_flag = False
 model_table2 = list()
-for line in model2:
+for line2 in model2:
     if start_flag:
-        tmp_albedo, tmp_ti,tmp_t = re.findall("\d+\.\d+", line)
+        tmp_albedo, tmp_ti,tmp_t = re.findall("\d+\.\d+", line2)
         model_table2.append([float(tmp_albedo),float(tmp_ti),float(tmp_t)])
-    elif "Columns are Albedo" in line:
+    elif "Columns are Albedo" in line2:
         start_flag = True
         
 # Map TI to albedo domain
-OFFSET = 8145529
+
 print('Mapping TI to albedo domain...')
 num_row,num_col = albedo.shape
 mapped_TI = np.zeros((num_row,num_col))
@@ -90,7 +102,7 @@ for i in range(num_row):
     if (tmp_lat<=TI_lat_start and tmp_lat>=TI_lat_end):
         for j in range(num_col):
             if not np.isnan(albedo[i,j]):
-                tmp_lon = lon_start+j*lon_del+OFFSET
+                tmp_lon = lon_start+j*lon_del
                 if(tmp_lon>= TI_lon_start and tmp_lon <= TI_lon_end):
                     mapped_TI[i,j] = TI[round((TI_lat_start-tmp_lat)/TI_lat_del),round((tmp_lon-TI_lon_start)/TI_lon_del)]
 print('Mapping TI to albedo domain...done!')           
@@ -108,9 +120,13 @@ print('Retrieving temperature map...')
 T_res = np.zeros((num_row,num_col))
 for i in range(num_row):
     for j in range(num_col):
-        if not np.isnan(albedo[i,j]) and mapped_TI[i,j]!=0:
+        if not np.isnan(albedo[i,j]) and mapped_TI[i,j]!=0 and albedo[i,j]!=0:
             T_res[i,j] = f(albedo[i,j],mapped_TI[i,j])
+            
 print('Retrieving temperature map...done!')            
 plt.imshow(T_res)
 spy.envi.save_image(T_savefile+'_'+str(degree)+'degree.hdr',T_res,force = True)
+text_file = open(T_savefile+'_'+str(degree)+'degree.hdr', "a")
+text_file.write(proj)
+text_file.close()
 
