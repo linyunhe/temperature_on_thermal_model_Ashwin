@@ -23,6 +23,8 @@ There are two versions: one for jupyter notebook (Generate_Thermal_Map_txt.ipynb
 
 *What is the filename of albedo:* Lambert albedo cube for one scene
 
+*Which band is selected out of albedo file:* The selected band number (starting from 0)
+
 *What is the filename of thermal inertia:* Thermal inertia overlapped with the previous Lambert albedo cube
 
 *What is the filename of thermal model 1:* Thermal model 1 at degree 1
