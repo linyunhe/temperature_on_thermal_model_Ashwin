@@ -10,6 +10,7 @@ import numpy as np
 import re
 from scipy import interpolate
 import matplotlib.pyplot as plt
+import math
 
 folder = input("What is your folder path:")
 albedo_filename = input("What is the filename of albedo:")
@@ -53,17 +54,20 @@ for line in fh:
         lon_start = float(lon_start)
         lat_start = float(lat_start)
         lon_del = float(lon_del)
-        lat_del = float(lat_del)
-        if lon_start < 0:
-            lon_start = lon_start + OFFSET
+        lat_del = float(lat_del)        
         proj += line
         flag = True
+    if "projection info" in line:
+        tmp = line.split(',')
+        r,lat_offset, lon_offset = tmp[1:4]
+        r = float(r)
     if flag:
         if "wavelength units" in line:
             break
         else:
             proj += line
-        
+lon_start = lon_start + float(lon_offset)/180*math.pi*r
+lat_start = lat_start + float(lat_offset)/180*math.pi*r
 fh.close()
 print("TI start long: "+str(TI_lon_start)+" and delta: "+str(TI_lon_del))
 print("TI start lat: "+str(TI_lat_start)+" and delta: "+str(TI_lat_del))
