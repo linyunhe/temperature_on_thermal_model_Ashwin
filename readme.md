@@ -38,3 +38,17 @@ There are two versions: one for jupyter notebook (Generate_Thermal_Map_txt.ipynb
 *What is your expected degree:* Expected viewing degree of this scene
 
 *Save name of output temperature:* Name of output file
+
+# Generate local incidence angle based on elevation file
+This is the python version and assume you have already installed these libraries:\
+[Spectral](http://www.spectralpython.net/), [Pillow](https://pillow.readthedocs.io/en/stable/), [NumPy](http://www.numpy.org/), [re](https://docs.python.org/3/library/re.html) and [SciPy](https://www.scipy.org/).
+
+**Input**: DEM file (elevation in meters), DDR of this scene, targeted pixel size
+
+**Output**: Local incidence angles with the same spatial size of DDR
+
+## Jupyter notebook
+1. Download and open generate_local_incidence_angle.ipynb.
+2. Change the file names (both input and output) in the second cell.
+3. Change the solar parameters in the first two lines of the third cell.
+4. Run the whole jupyter notebook.
